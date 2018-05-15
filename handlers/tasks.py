@@ -1,5 +1,5 @@
 """
-The tasks module provides a plugin class (TaskPlugin) which allows a
+The tasks module provides a handler class (TaskHandler) which allows a
 tasklet to create other tasklets.
 
 If a tasklet yields a generator object, it is installed into the scheduler
@@ -33,8 +33,8 @@ class Watch(object):
         self.watching_task = watching_task
 
 
-class TasksPlugin(object):
-    """The task plugin allows running tasks to start other tasks by 
+class TasksHandler(object):
+    """The task handler allows running tasks to start other tasks by 
     yielding generator, on_finish or spawn objects.
     """
     handled_types = [Watch, Async, StopIteration, types.GeneratorType]

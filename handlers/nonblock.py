@@ -1,11 +1,11 @@
 """
-The nonblock module provides a plugin class (NonBlockPlugin) which allows
+The nonblock module provides a handler class (NonBlockHandler) which allows
 a tasklet to momentarily run in a seperate thread.
 
 If a tasklet yields NonBlock(), it's next iteration will be performed in a
 thread.
 
-The plugin uses a threadpool with a default of 2 worker threads.
+The handler uses a threadpool with a default of 2 worker threads.
 """
 
 from Queue import Queue, Empty, Full
@@ -21,7 +21,7 @@ class Unblock(object):
         pass
 
 
-class NonBlockPlugin(object):
+class NonBlockHandler(object):
     """Allows a tasklet to yield Unblock(), which will cause the next
     iteration to run in a seperate thread.
     """

@@ -1,19 +1,19 @@
-import plugins.sleep as sleep
-import plugins.tasks as tasks
-import plugins.nonblock as nonblock
-import plugins.msg as msg
+import handlers.sleep as sleep
+import handlers.tasks as tasks
+import handlers.nonblock as nonblock
+import handlers.msg as msg
+import handlers.tube as tube
 
 
 
-class StopIteratorPlugin(object):
-    """This is the default plugin for handling StopIteration exceptions.
+class StopIteratorHandler(object):
+    """This is the default handler for handling StopIteration exceptions.
     It simply ignores the exception, and does not add the task back into 
     the scheduler.
     """
     handled_types = [StopIteration]
     def is_waiting(self): return False
-    def handle(self, exception, task): 
-        pass
+    def handle(self, exception, task): pass
 
 
 def hertz(Hz, fn, strict=True):
@@ -29,14 +29,18 @@ def hertz(Hz, fn, strict=True):
         yield T-D
 
 
-def schedule():
+def schedule(_d={}):
     """Schedule factory. Builds a schedule and registers
-    some useful plugins."""
+    some useful handlers.
+    """
+    if 's' in _d: return _d['s']
     s = Schedule()
-    s.register_plugin(sleep.SleepPlugin())
-    s.register_plugin(tasks.TasksPlugin())
-    s.register_plugin(nonblock.NonBlockPlugin())
-    s.register_plugin(msg.MessagePlugin())
+    s.register_handler(sleep.SleepHandler())
+    s.register_handler(tasks.TasksHandler())
+    s.register_handler(nonblock.NonBlockHandler())
+    s.register_handler(msg.MessageHandler())
+    s.register_handler(tube.TubeHandler())
+    _d['s'] = s
     return s
 
 
@@ -46,14 +50,12 @@ class Schedule(object):
     """
     def __init__(self):
         self.tasks = []
-        self.handlers = {}
-        self.plugins = set()
-        self.register_plugin(StopIteratorPlugin())
-        self.started = False
-        self.child_schedules = []
+        self.handlers = set()
+        self.type_handlers = {}
+        self.register_handler(StopIteratorHandler())
 
-    def register_plugin(self, plugin, types=[]):
-        """Plugins are classes which provide 
+    def register_handler(self, handler, types=[]):
+        """Handlers are classes which provide 
         def is_waiting(self): pass
         and
         def handle(self, v, task): pass
@@ -61,12 +63,12 @@ class Schedule(object):
         arg is yielded by a task. The tick method is called at the 
         start of each Schedule().tick() call.
         """
-        plugin.schedule = self
-        for method in getattr(plugin, 'exported_functions', []):
+        handler.schedule = self
+        for method in getattr(handler, 'exported_functions', []):
             setattr(self, method.__name__, method)
-        for type in list(plugin.handled_types) + list(types):
-            self.handlers[type] = plugin
-        self.plugins.add(plugin)
+        for type in list(handler.handled_types) + list(types):
+            self.type_handlers[type] = handler
+        self.handlers.add(handler)
 
     def install(self, generator, initial_value=None):
         """Installs a generator into the schedule. 
@@ -78,12 +80,11 @@ class Schedule(object):
 
     def tick(self):
         """Iterates the scheduler, running all tasks and calling all 
-        plugins.
+        handlers.
         """
-        self.started = True
         active = False
-        for plugin in self.plugins:
-            active = plugin.is_waiting() or active
+        for handler in self.handlers:
+            active = handler.is_waiting() or active
         active = (len(self.tasks) > 0) or active
         tasks = []
         while True:
@@ -102,10 +103,10 @@ class Schedule(object):
                 tasks.append((task, None))
             else:
                 try:
-                    plugin = self.handlers[type(r)]
+                    handler = self.type_handlers[type(r)]
                 except KeyError:
-                    raise KeyError('Don\'t know what to do with yielded type: %s' % type(r))
-                plugin.handle(r, task)
+                    raise RuntimeError("Don't know what to do with yielded type: %s" % type(r))
+                handler.handle(r, task)
         self.tasks[:] = tasks
         return active
 

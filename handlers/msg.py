@@ -1,20 +1,21 @@
 from collections import defaultdict
 
 
-class Send(object):
+
+class SendMsg(object):
     def __init__(self, type, *args):
         self.type = type
         self.args = args
 
 
-class Recv(object):
+class RecvMsg(object):
     def __init__(self, type):
         self.type = type
 
 
-class MessagePlugin(object):
+class MessageHandler(object):
     def __init__(self):
-        self.handled_types = [Send, Recv]
+        self.handled_types = [SendMsg, RecvMsg]
         self.receiving = defaultdict(list)
         self.sending = defaultdict(list)
         self.pending = list()
@@ -37,9 +38,9 @@ class MessagePlugin(object):
         return len(self.sending) > 0
 
     def handle(self, msg, task):
-        if msg.__class__ is Recv:
+        if msg.__class__ is RecvMsg:
             self.receiving[msg.type].append(task)
             self.pending.append(msg.type)
-        elif msg.__class__ is Send:
+        elif msg.__class__ is SendMsg:
             self.sending[msg.type].append((task, msg.args))
 
