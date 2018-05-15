@@ -2,9 +2,9 @@ from collections import defaultdict
 
 
 class Send(object):
-    def __init__(self, type, arg):
+    def __init__(self, type, *args):
         self.type = type
-        self.arg = arg
+        self.args = args
 
 
 class Recv(object):
@@ -24,8 +24,8 @@ class MessagePlugin(object):
         if msg.__class__ is Recv:
             senders = self.sending[msg.type]
             if senders:
-                sender, arg = senders.pop(0)
-                self.schedule.install(task, arg)
+                sender, args = senders.pop(0)
+                self.schedule.install(task, args)
                 self.schedule.install(sender, task)
             else:
                 self.receiving[msg.type].append(task)
@@ -33,8 +33,9 @@ class MessagePlugin(object):
             receivers = self.receiving[msg.type]
             if receivers:
                 receiver = receivers.pop(0)
-                self.schedule.install(receiver, msg.arg)
-                self.schedule.install(task, receiver)
+                self.schedule.install(receiver, msg.args)
             else:
-                self.sending[msg.type].append((task, msg.arg))
+                receiver = None
+                self.sending[msg.type].append((task, msg.args))
+            self.schedule.install(task, receiver)
 
