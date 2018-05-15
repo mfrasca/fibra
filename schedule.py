@@ -66,6 +66,14 @@ class Schedule(object):
         self.watchers = weakref.WeakKeyDictionary()
         self.idle_time = self.MIN_IDLE_TIME 
         self.cycles = 0
+        self.idle_funcs = []
+
+    def register_idle_func(self, func):
+        """Register a function to be called when the schedule is idle.
+        """
+        assert callable(func)
+        self.idle_funcs.append(func)
+
 
     def register_handler(self, handler, types=[]):
         """Handlers are classes which provide 
@@ -166,6 +174,7 @@ class Schedule(object):
             self.idle_time *= 1.1
             if self.idle_time > self.MAX_IDLE_TIME:
                 self.idle_time = self.MAX_IDLE_TIME
+            for fn in self.idle_funcs: fn()
         else:
             self.idle_time = self.MIN_IDLE_TIME
         return active
