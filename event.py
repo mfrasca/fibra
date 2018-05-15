@@ -6,6 +6,11 @@ for tasks over TCP.
 import fibra
 import fibra.net
 
+import socket
+import sys
+import traceback
+
+
 schedule = fibra.schedule()
 
 class Connection(object):
@@ -13,47 +18,73 @@ class Connection(object):
     A base connection class for fibra.event.
     """
     def __init__(self, transport):
+        self.running = True
         self.protocol = Protocol(transport)
         self.outbox = fibra.Tube()
-        self._closed = False
+        schedule.install(self.start())
 
     def start(self):
         yield fibra.Async(self.receiver())
         yield fibra.Async(self.sender())
 
-    def send(self, top, headers, body):
-        pass
+    def on_connect(self):
+        yield None
+
+    def on_close(self):
+        yield None
+
+    def send(self, top, headers, body=""):
+        if body:
+            headers["content-length"] = "%s"%len(body)
+        else:
+            if "content-length" in headers:
+                headers.pop("content-length")
+        return self.outbox.push((top, headers, body))
 
     def sender(self):
-        while True:
-            top, headers, body = yield self.outbox.pop()
+        while self.running:
+            try:
+                top, headers, body = yield self.outbox.pop()
+            except fibra.ClosedTube:
+                break
             try:
                 yield self.protocol.send(top, headers, body)
             except Exception, e:
-                print "Connection lost:", e
+                print "Connection lost while sending:", type(e), e
                 break
-        self.close()
 
+        yield self.close()
+        
     def receiver(self):
-        while True:
+        while self.running:
             try:
                 top, headers, body = yield self.protocol.recv()
-            except Exception, e:
-                print "Connection lost:", e
+            except fibra.net.Shutdown:
                 break
-            self.dispatch(top, headers, body)
-        self.close()
+            except Exception, e:
+                print "Connection lost while receiving:", type(e), e
+                break
+            try:
+                yield self.dispatch(top, headers, body)
+            except Exception, e:
+                print "Exception caught in method:", type(e), e
+                print "Arguments:", top, headers, body
+                break
+        yield self.outbox.close()
+        yield self.close()
 
     def dispatch(self, top, headers, body):
-        pass
+        method = getattr(self, 'do_%s'%top, None)
+        if method is not None:
+            return method(headers, body)
+        else:
+            raise AttributeError("Uknown method: %s"%top)
 
     def close(self):
-        if not self._closed:
-            self._closed = True
-            self.protocol.close()
-
-    def __del__(self):
-        self.close()
+        if self.running:
+            self.running = False
+            yield self.on_close()
+            yield self.protocol.close()
 
 
 class Protocol(object):
@@ -91,73 +122,40 @@ class Protocol(object):
         yield fibra.Return(headers)
 
     def close(self):
-        self.transport.close()
+        return self.transport.close()
 
 
-class ClientConnection(Connection):
+def serve(address, connection_class, on_listen=None):
     """
-    A connection from a fibra.event client.
+    This task listens for connections on a address.
     """
-    listeners = {}
-    def __init__(self, *args, **kw):
-        Connection.__init__(self, *args, **kw)
-        self.subscriptions = set()
+    def accept_task(transport):
+        client = connection_class(transport)
+        yield client.on_connect()
+    yield fibra.net.listen(address, accept_task, listen_task=on_listen)
 
-    def publish(self, headers, body):
-        for s in self.listeners.setdefault(headers['name'], set()):
-            yield s.outbox.push(("message", headers, body))
 
-    def dispatch(self, top, headers, body):
-        if top == "subscribe":
-            self.listeners.setdefault(headers['name'], set()).add(self)
-            self.subscriptions.add(headers['name'])
-        elif top == "publish":
-            schedule.install(self.publish(headers, body))
-        else:
-            method = getattr(self, 'do_%s'%top, None)
-            if method is not None:
-                method(headers, body)
+def connect(address, connection_class, retry=0):
+    """
+    This tasks connects to a server.
+    """
+    transport = None
+    sleep = 1.0
+    while transport is None:
+        try:
+            transport = yield fibra.net.connect(address)
+        except socket.error:
+            if retry is not None:
+                retry -= 1
+                if retry < 0:
+                    raise 
             else:
-                self.close()
+                print 'Cannot connect to', address, 'retrying...'
+                yield sleep
+                sleep *= 1.5
+                if sleep > 60:
+                    sleep = 60
 
-    def close(self):
-        for i in self.subscriptions:
-            self.listeners[i].discard(self)
-        Connection.close(self)
-    
+    yield fibra.Return(connection_class(transport))
 
-class ServerConnection(Connection):
-    """
-    A connection to a fibra.event server.
-    """
-    def __init__(self, *args, **kw):
-        Connection.__init__(self, *args, **kw)
-        schedule.install(self.start())
 
-    def dispatch(self, top, headers, body):
-        if top == "message":
-            self.recv_message(headers, body)
-        else:
-            method = getattr(self, 'do_%s'%top, None)
-            if method is not None:
-                method(headers, body)
-            else:
-                self.close()
-
-    def recv_message(self, headers, body):
-        pass
-
-    def push(self, name, headers, body):
-        def task():
-            yield self.outbox.push((name, headers, body))
-        schedule.install(task())
-
-    def publish(self, name, headers, body):
-        headers["name"] = name
-        headers["content-length"] = "%s"%len(body)
-        self.push("publish", headers, body)
-
-    def subscribe(self, name):
-        self.push("subscribe", dict(name=name), "")
-        
-        

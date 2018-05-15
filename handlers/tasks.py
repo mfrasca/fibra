@@ -37,16 +37,34 @@ class Return(object):
         self.value = value
 
 
+class Suspend(object):
+    """yield Suspend() to remove a task from the schedule.
+    The task will need to be resumed manually by the application.
+    """
+    def __init__(self):
+        pass
+
+
+class Self(object):
+    """yield Self() to get a reference to the yielding task.
+    """
+    def __init__(self): 
+        pass
+
+
 class TasksHandler(object):
     """The task handler allows running tasks to start other tasks by 
     yielding generator, on_finish or spawn objects.
     """
     active = False
-    handled_types = [Async, StopIteration, types.GeneratorType, Return]
+    handled_types = [Async, StopIteration, types.GeneratorType, Return, Suspend, Self]
+    
     def __init__(self):
-        self.tasks = []
         self.waiting_tasks = {}
         self.handlers = dict((i, getattr(self, "handle_%s" % i.__name__)) for i in self.handled_types)
+
+    def status(self):
+        return len(self.waiting_tasks), self.waiting_tasks
 
     def handle(self, new_task, task):
         self.active = True
@@ -56,7 +74,7 @@ class TasksHandler(object):
         try:
             waiting_task = self.waiting_tasks.pop(task)
         except KeyError, e:
-            raise RuntimeError("Return yielded from a top level task.")
+            raise RuntimeError("Return yielded from a top level task. (%s)"%task)
         self.schedule.unwatch(task)
         self.schedule.install(waiting_task, event.value)
 
@@ -76,6 +94,12 @@ class TasksHandler(object):
         self.schedule.install(task) 
         if event.watch:
             self.schedule.watch(event.task, event.watch)
+
+    def handle_Suspend(self, event, task):
+        pass
+
+    def handle_Self(self, event, task):
+        self.schedule.install(task, task)
 
     def handle_generator(self, new_task, task):
         def watcher(e):

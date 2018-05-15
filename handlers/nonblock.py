@@ -35,6 +35,9 @@ class NonBlockHandler(object):
         self.workers = None
         self.worker_count = worker_count
 
+    def status(self):
+        return self.running_tasks
+
     def start_workers(self):
         self.workers = set([Thread(target=self.worker_thread) for i in xrange(self.worker_count)])
         for worker in self.workers:

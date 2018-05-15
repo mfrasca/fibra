@@ -40,6 +40,9 @@ class SleepHandler(object):
         self.tasks = []
         self.exported_functions = [self.defer]
 
+    def status(self):
+        return len(self.tasks)
+
     def defer(self, T, task):
         """Defer starting a task for T seconds.
         """

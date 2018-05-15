@@ -9,7 +9,6 @@ to create tasks which can be iterated.
 from schedule import *
 from handlers.sleep import Sleep
 from handlers.nonblock import Unblock
-from handlers.tasks import Async, Return, Finished
-from handlers.msg import SendMsg, RecvMsg
-from handlers.tube import Tube, EmptyTube
+from handlers.tasks import Async, Return, Finished, Suspend, Self
+from handlers.tube import Tube, EmptyTube, ClosedTube
 from handlers.io import Read, Write

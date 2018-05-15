@@ -1,3 +1,4 @@
+import gc
 import time
 import weakref
 import collections
@@ -5,7 +6,6 @@ import collections
 import handlers.sleep as sleep
 import handlers.tasks as tasks
 import handlers.nonblock as nonblock
-import handlers.msg as msg
 import handlers.tube as tube
 import handlers.io as io
 
@@ -19,6 +19,7 @@ class StopIteratorHandler(object):
     active = False
     def pre_schedule(self): pass
     def handle(self, exception, task): pass
+    def status(self): pass
 
 
 def hertz(Hz, fn, strict=True):
@@ -43,7 +44,6 @@ def schedule(_d={}):
     s.register_handler(sleep.SleepHandler())
     s.register_handler(tasks.TasksHandler())
     s.register_handler(nonblock.NonBlockHandler())
-    s.register_handler(msg.MessageHandler())
     s.register_handler(tube.TubeHandler())
     s.register_handler(io.IOHandler())
     _d['s'] = s
@@ -55,22 +55,17 @@ class Schedule(object):
     generator based tasklets.
     """
     MIN_IDLE_TIME = 0.0000000000000000000000000001
-    MAX_IDLE_TIME = 0.001
+    MAX_IDLE_TIME = 0.3
     enable_idle = True
     def __init__(self):
         self.tasks = collections.deque()
+        self.next_tasks = collections.deque()
         self.handlers = set()
         self.type_handlers = {}
         self.register_handler(StopIteratorHandler())
         self.watchers = weakref.WeakKeyDictionary()
-        self.idle_funcs = []
         self.idle_time = self.MIN_IDLE_TIME 
-
-    def register_idle_func(self, func):
-        """Register a function to be called when the schedule is idle.
-        """
-        assert callable(func)
-        self.idle_funcs.append(func)
+        self.cycles = 0
 
     def register_handler(self, handler, types=[]):
         """Handlers are classes which provide 
@@ -103,20 +98,36 @@ class Schedule(object):
         self.watchers.pop(task)
 
     def run(self):
+        gc.disable()
         while self.tick(): pass
+
+    def debug(self):
+        print 'Queued Tasks:'
+        print self.tasks
+        print
+        print 'Next Tasks:'
+        print self.next_tasks
+        print
+        print 'Handlers:'
+        for handler in self.handlers:
+            print handler.__class__.__name__, handler.active, handler.status()
 
     def tick(self):
         """Iterates the scheduler, running all tasks and calling all 
         handlers.
         """
+        self.cycles += 1
+        if self.cycles > 1000:
+            self.cycles = 0
+            gc.collect()
+            
         active = False
         for handler in self.handlers:
             if handler.active:
                 handler.pre_schedule() 
                 active = handler.active or active
-            
         active = (len(self.tasks) > 0) or active
-        tasks = collections.deque()
+        tasks = self.next_tasks
         idle = True
         while True:
             try:
@@ -149,13 +160,12 @@ class Schedule(object):
                 handler = self.type_handlers[type(r)]
                 handler.handle(r, task)
                 idle = False
-        self.tasks = tasks
+        self.tasks, self.next_tasks  = self.next_tasks, self.tasks
         if idle and self.enable_idle:
             time.sleep(self.idle_time)
             self.idle_time *= 1.1
             if self.idle_time > self.MAX_IDLE_TIME:
                 self.idle_time = self.MAX_IDLE_TIME
-            for fn in self.idle_funcs: fn()
         else:
             self.idle_time = self.MIN_IDLE_TIME
         return active
