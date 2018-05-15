@@ -4,6 +4,7 @@ import plugins.nonblock as nonblock
 import plugins.msg as msg
 
 
+
 class StopIteratorPlugin(object):
     """This is the default plugin for handling StopIteration exceptions.
     It simply ignores the exception, and does not add the task back into 
@@ -12,7 +13,6 @@ class StopIteratorPlugin(object):
     handled_types = [StopIteration]
     def is_waiting(self): return False
     def handle(self, exception, task): 
-        print task, 'is finished'
         pass
 
 
@@ -46,10 +46,11 @@ class Schedule(object):
     """
     def __init__(self):
         self.tasks = []
-        self.hit_list = set()
         self.handlers = {}
         self.plugins = set()
         self.register_plugin(StopIteratorPlugin())
+        self.started = False
+        self.child_schedules = []
 
     def register_plugin(self, plugin, types=[]):
         """Plugins are classes which provide 
@@ -79,6 +80,7 @@ class Schedule(object):
         """Iterates the scheduler, running all tasks and calling all 
         plugins.
         """
+        self.started = True
         active = False
         for plugin in self.plugins:
             active = plugin.is_waiting() or active
@@ -102,7 +104,7 @@ class Schedule(object):
                 try:
                     plugin = self.handlers[type(r)]
                 except KeyError:
-                    raise KeyError('No plugin is registered to handle type: %s' % type(r))
+                    raise KeyError('Don\'t know what to do with yielded type: %s' % type(r))
                 plugin.handle(r, task)
         self.tasks[:] = tasks
         return active

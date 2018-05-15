@@ -13,29 +13,33 @@ class Recv(object):
 
 
 class MessagePlugin(object):
-    handled_types = [Send, Recv]
-    receiving = defaultdict(list)
-    sending = defaultdict(list)
+    def __init__(self):
+        self.handled_types = [Send, Recv]
+        self.receiving = defaultdict(list)
+        self.sending = defaultdict(list)
+        self.pending = list()
 
     def is_waiting(self):
-        return False
+        install = self.schedule.install
+        sending = self.sending
+        receiving = self.receiving
+        pending = []
+        for p in self.pending:
+            if p in sending:
+                task, args = sending[p].pop(0)
+                map(lambda x: install(x, args), receiving[p])
+                receiving[p][:] = []
+                install(task)
+                if not sending[p]: sending.pop(p)
+            else:
+                pending.append(p)
+        self.pending[:] = pending
+        return len(self.sending) > 0
 
     def handle(self, msg, task):
         if msg.__class__ is Recv:
-            senders = self.sending[msg.type]
-            if senders:
-                sender, args = senders.pop(0)
-                self.schedule.install(task, args)
-                self.schedule.install(sender, task)
-            else:
-                self.receiving[msg.type].append(task)
+            self.receiving[msg.type].append(task)
+            self.pending.append(msg.type)
         elif msg.__class__ is Send:
-            receivers = self.receiving[msg.type]
-            if receivers:
-                receiver = receivers.pop(0)
-                self.schedule.install(receiver, msg.args)
-            else:
-                receiver = None
-                self.sending[msg.type].append((task, msg.args))
-            self.schedule.install(task, receiver)
+            self.sending[msg.type].append((task, msg.args))
 
