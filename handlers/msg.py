@@ -20,7 +20,7 @@ class MessageHandler(object):
         self.sending = defaultdict(list)
         self.pending = list()
 
-    def is_waiting(self):
+    def pre_schedule(self):
         install = self.schedule.install
         sending = self.sending
         receiving = self.receiving

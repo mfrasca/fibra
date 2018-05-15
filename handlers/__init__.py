@@ -31,7 +31,7 @@ class Handler(object):
         #but DONT add it back to the scheduler here!
         pass
 
-    def is_waiting(self):
+    def pre_schedule(self):
         #add tasks back into the schedule in this function.
         self.schedule.install(task)
 

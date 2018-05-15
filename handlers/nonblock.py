@@ -54,15 +54,13 @@ class NonBlockHandler(object):
         self.running_tasks += 1
         self.inbox.put(task)
 
-    def is_waiting(self):
+    def pre_schedule(self):
         while self.running_tasks > 0:
             try:
                 r,task = self.outbox.get_nowait()
             except Empty:
                 return True
             self.running_tasks -= 1
-            if isinstance(r, Exception):
-                raise r
             self.schedule.install(task, initial_value=r)
         return False
 

@@ -11,7 +11,7 @@ swapped out tasklets. This means many tasks can be paused and waiting without
 effecting the performance of the scheduler.
 """
 
-from time import clock as time_func
+from time import time as time_func
 from heapq import heappush, heappop
 
 
@@ -44,7 +44,7 @@ class SleepHandler(object):
         """
         self.handle(T, task)
 
-    def is_waiting(self):
+    def pre_schedule(self):
         now = time_func()
         while self.tasks:
             D,task,T = heappop(self.tasks)

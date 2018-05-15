@@ -9,35 +9,39 @@ If a tasklet yields a Wait object with a generator object as its argument,
 it will install the generator into the scheduler (making it a tasklet) and 
 pause its execution and wait until the new tasklet is finished.
 
-If as tasklet yields a Watch object with a generator object as its argument,
-it will continue to run until completion and then install the generator into
-the scheduler (making it a tasklet).
 """
 
 import types
 
 
+
+class Finished(Exception):
+    """Raised when a sub task finishes.
+    """
+    pass
+
+
 class Async(object):
     """yield Async(task) to start another task and run it concurrently.
     """
-    def __init__(self, task):
+    def __init__(self, task, watch=None):
         self.task = task
+        self.watch = watch
 
 
-class Watch(object):
-    """yield watch(task) to start another task when the current task or
-    watching_task is finished.
+class Return(object):
+    """yield Return(value) from a spawned generator to return that value
+    to the waiting task.
     """
-    def __init__(self, task, watching_task=None):
-        self.task = task
-        self.watching_task = watching_task
+    def __init__(self, value):
+        self.value = value
 
 
 class TasksHandler(object):
     """The task handler allows running tasks to start other tasks by 
     yielding generator, on_finish or spawn objects.
     """
-    handled_types = [Watch, Async, StopIteration, types.GeneratorType]
+    handled_types = [Async, StopIteration, types.GeneratorType, Return]
     def __init__(self):
         self.tasks = []
         self.waiting_tasks = {}
@@ -46,28 +50,39 @@ class TasksHandler(object):
     def handle(self, new_task, task):
         self.handlers[type(new_task)](new_task, task)
 
+    def handle_Return(self, event, task):
+        try:
+            waiting_task = self.waiting_tasks.pop(task)
+        except KeyError, e:
+            raise RuntimeError("Return yielded from a top level task.")
+        self.schedule.unwatch(task)
+        self.schedule.install(waiting_task, event.value)
+
     def handle_StopIteration(self, exception, task):
         try:
-            self.tasks.extend(self.waiting_tasks.pop(task))
+            v = None
+            if task in self.schedule.watchers:
+                self.schedule.unwatch(task)
+                #v = Finished() #TODO only do this if requested.
+            self.schedule.install(self.waiting_tasks.pop(task), v)
+                
         except KeyError:
             pass
 
     def handle_Async(self, event, task):
         self.tasks.extend((event.task, task))
-
-    def handle_Watch(self, watch, task):
-        if watch.watching_task is None:
-            watching_task = task
-        else:
-            watching_task = watch.watching_task
-        self.waiting_tasks.setdefault(watching_task, []).append(watch.task)
-        self.tasks.append(task)
+        if event.watch:
+            self.schedule.watch(event.task, event.watch)
 
     def handle_generator(self, new_task, task):
-        self.waiting_tasks.setdefault(new_task, []).append(task)
+        def watcher(e):
+            parent = self.waiting_tasks.pop(new_task)
+            self.schedule.install(parent, e)
+        self.waiting_tasks[new_task] = task
+        self.schedule.watch(new_task, watcher)
         self.tasks.append(new_task) 
 
-    def is_waiting(self): 
+    def pre_schedule(self): 
         for t in self.tasks:
             self.schedule.install(t)
         self.tasks[:] = []
