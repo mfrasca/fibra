@@ -14,6 +14,8 @@ class RecvMsg(object):
 
 
 class MessageHandler(object):
+    active = False
+
     def __init__(self):
         self.handled_types = [SendMsg, RecvMsg]
         self.receiving = defaultdict(list)
@@ -35,9 +37,10 @@ class MessageHandler(object):
             else:
                 pending.append(p)
         self.pending[:] = pending
-        return len(self.sending) > 0
+        self.active = len(self.sending) > 0
 
     def handle(self, msg, task):
+        self.active = True
         if msg.__class__ is RecvMsg:
             self.receiving[msg.type].append(task)
             self.pending.append(msg.type)

@@ -45,6 +45,7 @@ class Tube(object):
 class TubeHandler(object):
     handled_types = TubePush, TubePop
     wait = False
+    active = False
 
     def handle(self, v, task):
         tube = v.tube
@@ -76,5 +77,5 @@ class TubeHandler(object):
     def pre_schedule(self):
         wait = self.wait
         self.wait = False
-        return wait
+        self.active = wait
 

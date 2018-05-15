@@ -25,6 +25,7 @@ class NonBlockHandler(object):
     """Allows a tasklet to yield Unblock(), which will cause the next
     iteration to run in a seperate thread.
     """
+    active = False
     handled_types = [Unblock]
     def __init__(self, worker_count=2):
         self.inbox = Queue()
@@ -50,6 +51,7 @@ class NonBlockHandler(object):
             self.outbox.put((r,task))
 
     def handle(self, unblock, task):
+        self.active = True
         if self.workers is None: self.start_workers()
         self.running_tasks += 1
         self.inbox.put(task)
@@ -59,10 +61,11 @@ class NonBlockHandler(object):
             try:
                 r,task = self.outbox.get_nowait()
             except Empty:
-                return True
+                self.active = True
+                return
             self.running_tasks -= 1
             self.schedule.install(task, initial_value=r)
-        return False
+        self.active = False
 
                 
 

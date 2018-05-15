@@ -1,5 +1,6 @@
 import time
 import weakref
+import collections
 
 import handlers.sleep as sleep
 import handlers.tasks as tasks
@@ -15,7 +16,8 @@ class StopIteratorHandler(object):
     the scheduler.
     """
     handled_types = [StopIteration]
-    def pre_schedule(self): return False
+    active = False
+    def pre_schedule(self): pass
     def handle(self, exception, task): pass
 
 
@@ -54,8 +56,9 @@ class Schedule(object):
     """
     MIN_IDLE_TIME = 0.0000000000000000000000000001
     MAX_IDLE_TIME = 0.001
+    enable_idle = True
     def __init__(self):
-        self.tasks = []
+        self.tasks = collections.deque()
         self.handlers = set()
         self.type_handlers = {}
         self.register_handler(StopIteratorHandler())
@@ -92,9 +95,8 @@ class Schedule(object):
 
     def watch(self, task, watcher):
         """If a task fails with an exception, call watcher with the
-        exception as its only argument.
+        exception as its only argument. This is only for internal scheduler use.
         """
-        assert task not in self.watchers
         self.watchers[task] = watcher
 
     def unwatch(self, task):
@@ -109,19 +111,23 @@ class Schedule(object):
         """
         active = False
         for handler in self.handlers:
-            active = handler.pre_schedule() or active
+            if handler.active:
+                handler.pre_schedule() 
+                active = handler.active or active
             
         active = (len(self.tasks) > 0) or active
-        tasks = []
+        tasks = collections.deque()
         idle = True
         while True:
             try:
-                task, send_value = self.tasks.pop(0)
+                task, send_value = self.tasks.popleft()
             except IndexError, e:
                 break 
             try:
                 try:
-                    if isinstance(send_value, Exception):
+                    if send_value is None:
+                        r = task.next()
+                    elif isinstance(send_value, Exception):
                         r = task.throw(send_value)
                     else:
                         r = task.send(send_value)
@@ -140,20 +146,17 @@ class Schedule(object):
             if r is None: 
                 tasks.append((task, None))
             else:
-                try:
-                    handler = self.type_handlers[type(r)]
-                except KeyError:
-                    raise RuntimeError("Don't know what to do with yielded type: %s" % type(r))
+                handler = self.type_handlers[type(r)]
                 handler.handle(r, task)
                 idle = False
-        self.tasks[:] = tasks
-        if idle:
+        self.tasks = tasks
+        if idle and self.enable_idle:
             time.sleep(self.idle_time)
             self.idle_time *= 1.1
             if self.idle_time > self.MAX_IDLE_TIME:
                 self.idle_time = self.MAX_IDLE_TIME
             for fn in self.idle_funcs: fn()
         else:
-            self.idle_time = self.MIN_IDLE_TIME 
+            self.idle_time = self.MIN_IDLE_TIME
         return active
 

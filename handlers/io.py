@@ -17,6 +17,7 @@ class Write(object):
 
 class IOHandler(object):
     handled_types = [Read, Write]
+    active = False
 
     def __init__(self):
         self.readers = {}
@@ -50,9 +51,10 @@ class IOHandler(object):
                 self.writers.pop(fd)
                 install(task, IOError("write has timed out"))
 
-        return len(self.readers) + len(self.writers)
+        self.active = len(self.readers) + len(self.writers)
     
     def handle(self, event, task):
+        self.active = True
         if event.__class__ is Write:
             if event.fd in self.writers: raise IOError("fd is being used")
             self.writers[event.fd] = task, event.timeout, time.time() + event.timeout

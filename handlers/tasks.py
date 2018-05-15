@@ -41,6 +41,7 @@ class TasksHandler(object):
     """The task handler allows running tasks to start other tasks by 
     yielding generator, on_finish or spawn objects.
     """
+    active = False
     handled_types = [Async, StopIteration, types.GeneratorType, Return]
     def __init__(self):
         self.tasks = []
@@ -48,6 +49,7 @@ class TasksHandler(object):
         self.handlers = dict((i, getattr(self, "handle_%s" % i.__name__)) for i in self.handled_types)
 
     def handle(self, new_task, task):
+        self.active = True
         self.handlers[type(new_task)](new_task, task)
 
     def handle_Return(self, event, task):
@@ -70,7 +72,8 @@ class TasksHandler(object):
             pass
 
     def handle_Async(self, event, task):
-        self.tasks.extend((event.task, task))
+        self.schedule.install(event.task) 
+        self.schedule.install(task) 
         if event.watch:
             self.schedule.watch(event.task, event.watch)
 
@@ -80,10 +83,7 @@ class TasksHandler(object):
             self.schedule.install(parent, e)
         self.waiting_tasks[new_task] = task
         self.schedule.watch(new_task, watcher)
-        self.tasks.append(new_task) 
+        self.schedule.install(new_task)
 
     def pre_schedule(self): 
-        for t in self.tasks:
-            self.schedule.install(t)
-        self.tasks[:] = []
-        return len(self.tasks) > 0 or len(self.waiting_tasks) > 0
+        self.active = len(self.waiting_tasks) > 0

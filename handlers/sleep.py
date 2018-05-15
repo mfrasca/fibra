@@ -33,6 +33,7 @@ class SleepHandler(object):
     it possible to schedule or pause a very large number of tasks
     without effecting performance of the scheduler.
     """
+    active = False
     handled_types = [Sleep, float, int]
 
     def __init__(self):
@@ -53,9 +54,9 @@ class SleepHandler(object):
             else:
                 heappush(self.tasks, (D,task,T))
                 break 
-        return len(self.tasks) > 0
+        self.active = len(self.tasks) > 0
 
     def handle(self, T, task):
         heappush(self.tasks, (float(T),task,time_func()))
-        return True
+        self.active = True
 
