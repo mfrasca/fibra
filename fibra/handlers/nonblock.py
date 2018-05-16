@@ -7,8 +7,12 @@ thread.
 
 The handler uses a threadpool with a default of 2 worker threads.
 """
-
-from Queue import Queue, Empty, Full
+import sys
+is_py2 = sys.version[0] == '2'
+if is_py2:
+    from Queue import Queue, Empty, Full
+else:
+    from queue import Queue, Empty, Full
 from threading import Thread
 
 import time
@@ -49,7 +53,7 @@ class NonBlockHandler(object):
             task = self.inbox.get()
             try:
                 r = task.next()
-            except Exception, e:
+            except(Exception, e):
                 r = e
             self.outbox.put((r,task))
 
@@ -63,7 +67,7 @@ class NonBlockHandler(object):
         while self.running_tasks > 0:
             try:
                 r,task = self.outbox.get_nowait()
-            except Empty:
+            except(Empty):
                 self.active = True
                 return
             self.running_tasks -= 1

@@ -1,7 +1,10 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+
 try:
     from setuptools import setup, find_packages, Extension
 except ImportError:
-    print 'You need to install setuptools to install this package.'
+    print('You need to install setuptools to install this package.')
     raise
 
 packages = find_packages()

@@ -32,8 +32,8 @@ class IOHandler(object):
         self.writers = {}
     
     def status(self):
-        print self.readers
-        print self.writers
+        print(self.readers)
+        print(self.writers)
         return len(self.readers), len(self.writers)
     
 
@@ -43,18 +43,18 @@ class IOHandler(object):
         all = readers + writers
         try:
             return select.select(readers, writers, all, 0)
-        except socket.error, e:
+        except(socket.error, e):
             if e.errno == EBADF:
                 for fd in readers:
                     try: 
                         select.select([fd], [], [], 0)
-                    except socket.error:
+                    except(socket.error):
                         task, check, timeout = self.readers.pop(fd)
                         self.schedule.install(task, IOError("read has EBADF %s"%task))
                 for fd in writers:
                     try: 
                         select.select([], [fd], [], 0)
-                    except socket.error:
+                    except(socket.error):
                         task, check, timeout = self.writers.pop(fd)
                         self.schedule.install(task, IOError("read has EBADF %s"%task))
                 return self.select()

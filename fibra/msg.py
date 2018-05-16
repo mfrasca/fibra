@@ -87,7 +87,7 @@ class Connection(fibra.event.Connection):
         try:
             if headers["method"][0] == "_": raise AttributeError('cannot access private methods.')
             method = getattr(self.rpc, headers['method'])
-        except AttributeError, e:
+        except(AttributeError, e):
             response['exception'] = 'AttributeError'
             response['msg'] = str(e)
         else:
@@ -97,7 +97,7 @@ class Connection(fibra.event.Connection):
                 while type(result) is types.GeneratorType:
                     result = yield result
                 result = self.serialize(response, result, headers)
-            except Exception, e:
+            except(Exception, e):
                 response['exception'] = e.__class__.__name__
                 response['msg'] = str(e)
                 result = NULL
@@ -110,7 +110,7 @@ class Connection(fibra.event.Connection):
             body = self.serialize(response, body)
         try:
             yield fibra.event.Connection.send(self, top, response, body)
-        except fibra.ClosedTube:
+        except(fibra.ClosedTube):
             raise Disconnect()
     
     def do_response(self, headers, body):
@@ -123,7 +123,7 @@ class Connection(fibra.event.Connection):
                 schedule.install(task, body)
             yield None
         else:
-            print "Expired request:", request_id
+            print("Expired request:", request_id)
 
 
 class RPC(object):

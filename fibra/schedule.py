@@ -1,13 +1,15 @@
+from __future__ import absolute_import
+
 import gc
 import time
 import weakref
 import collections
 
-import handlers.sleep as sleep
-import handlers.tasks as tasks
-import handlers.nonblock as nonblock
-import handlers.tube as tube
-import handlers.io as io
+import fibra.handlers.sleep as sleep
+import fibra.handlers.tasks as tasks
+import fibra.handlers.nonblock as nonblock
+import fibra.handlers.tube as tube
+import fibra.handlers.io as io
 
 
 class StopIteratorHandler(object):
@@ -110,15 +112,15 @@ class Schedule(object):
         while self.tick(): pass
 
     def debug(self):
-        print 'Queued Tasks:'
-        print self.tasks
-        print
-        print 'Next Tasks:'
-        print self.next_tasks
-        print
-        print 'Handlers:'
+        print('Queued Tasks:')
+        print(self.tasks)
+        print()
+        print('Next Tasks:')
+        print(self.next_tasks)
+        print()
+        print('Handlers:')
         for handler in self.handlers:
-            print handler.__class__.__name__, handler.active, handler.status()
+            print(handler.__class__.__name__, handler.active, handler.status())
 
     def tick(self):
         """Iterates the scheduler, running all tasks and calling all 
@@ -140,7 +142,7 @@ class Schedule(object):
         while True:
             try:
                 task, send_value = self.tasks.popleft()
-            except IndexError, e:
+            except(IndexError, e):
                 break 
             try:
                 try:
@@ -150,9 +152,9 @@ class Schedule(object):
                         r = task.throw(send_value)
                     else:
                         r = task.send(send_value)
-                except StopIteration:
+                except(StopIteration):
                     raise
-                except Exception, e:
+                except(Exception, e):
                     if task in self.watchers:
                         v = self.watchers.pop(task)(e)
                         if hasattr(v, 'send') and hasattr(v, 'throw'):
@@ -160,7 +162,7 @@ class Schedule(object):
                         continue
                     else:
                         raise
-            except StopIteration, e:
+            except(StopIteration, e):
                 r = e
             if r is None: 
                 tasks.append((task, None))

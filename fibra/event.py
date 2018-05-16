@@ -45,12 +45,12 @@ class Connection(object):
         while self.running:
             try:
                 top, headers, body = yield self.outbox.pop()
-            except fibra.ClosedTube:
+            except(fibra.ClosedTube):
                 break
             try:
                 yield self.protocol.send(top, headers, body)
-            except Exception, e:
-                print "Connection lost while sending:", type(e), e
+            except(Exception, e):
+                print("Connection lost while sending:", type(e), e)
                 break
 
         yield self.close()
@@ -59,16 +59,16 @@ class Connection(object):
         while self.running:
             try:
                 top, headers, body = yield self.protocol.recv()
-            except fibra.net.Shutdown:
+            except(fibra.net.Shutdown):
                 break
-            except Exception, e:
-                print "Connection lost while receiving:", type(e), e
+            except(Exception, e):
+                print("Connection lost while receiving:", type(e), e)
                 break
             try:
                 yield self.dispatch(top, headers, body)
-            except Exception, e:
-                print "Exception caught in method:", type(e), e
-                print "Arguments:", top, headers, body
+            except(Exception, e):
+                print("Exception caught in method:", type(e), e)
+                print("Arguments:", top, headers, body)
                 break
         yield self.outbox.close()
         yield self.close()
@@ -99,7 +99,7 @@ class Protocol(object):
         headers = yield self.collect_headers()
         try:
             size = int(headers.get('content-length', ""))
-        except ValueError:
+        except(ValueError):
             body = "" 
         else:
             body = yield self.transport.recv(size)
@@ -144,13 +144,13 @@ def connect(address, connection_class, retry=0):
     while transport is None:
         try:
             transport = yield fibra.net.connect(address)
-        except socket.error:
+        except(socket.error):
             if retry is not None:
                 retry -= 1
                 if retry < 0:
                     raise 
             else:
-                print 'Cannot connect to', address, 'retrying...'
+                print('Cannot connect to', address, 'retrying...')
                 yield sleep
                 sleep *= 1.5
                 if sleep > 60:

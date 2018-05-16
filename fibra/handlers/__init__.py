@@ -13,12 +13,12 @@ Eg:
 sets up a scheduler with the SleepHandler installed. To see what types a
 SleepHandler will handle:
 
->>> print sleep_handler.handled_types
+>>> print(sleep_handler.handled_types)
 [<class 'fibra.handlers.sleep.Sleep'>, <type 'int'>, <type 'float'>, <type 'long'>]
 
 To see what extra functions a handler will add to the scheduler:
 
->>> print sleep_handler.exported_functions
+>>> print(sleep_handler.exported_functions)
 [<bound method SleepHandler.defer of <fibra.handlers.sleep.SleepHandler object at 0xa13fd0>>]
 
 

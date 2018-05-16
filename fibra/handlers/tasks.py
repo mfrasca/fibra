@@ -73,7 +73,7 @@ class TasksHandler(object):
     def handle_Return(self, event, task):
         try:
             waiting_task = self.waiting_tasks.pop(task)
-        except KeyError, e:
+        except(KeyError, e):
             raise RuntimeError("Return yielded from a top level task. (%s)"%task)
         self.schedule.unwatch(task)
         self.schedule.install(waiting_task, event.value)
@@ -86,7 +86,7 @@ class TasksHandler(object):
                 #v = Finished() #TODO only do this if requested.
             self.schedule.install(self.waiting_tasks.pop(task), v)
                 
-        except KeyError:
+        except(KeyError):
             pass
 
     def handle_Async(self, event, task):
