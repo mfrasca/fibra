@@ -30,7 +30,7 @@ def hertz(Hz, fn, strict=True):
     T = 1.0 / Hz
     while True:
         N = sleep.time_func()
-        yield fn.next()
+        yield next(fn)
         D = sleep.time_func() - N
         if (D > T) and strict:
             raise RuntimeError("Cannot support %s Hz. Need: %f, Took: %f."%(Hz, T*1000, D*1000))
@@ -142,19 +142,19 @@ class Schedule(object):
         while True:
             try:
                 task, send_value = self.tasks.popleft()
-            except(IndexError, e):
+            except IndexError as e:
                 break 
             try:
                 try:
                     if send_value is None:
-                        r = task.next()
+                        r = next(task)
                     elif isinstance(send_value, Exception):
                         r = task.throw(send_value)
                     else:
                         r = task.send(send_value)
                 except(StopIteration):
                     raise
-                except(Exception, e):
+                except Exception as e:
                     if task in self.watchers:
                         v = self.watchers.pop(task)(e)
                         if hasattr(v, 'send') and hasattr(v, 'throw'):
@@ -162,7 +162,7 @@ class Schedule(object):
                         continue
                     else:
                         raise
-            except(StopIteration, e):
+            except StopIteration as e:
                 r = e
             if r is None: 
                 tasks.append((task, None))

@@ -11,7 +11,7 @@ packages = find_packages()
 
 setup(
     name = "fibra",
-    version = "0.0.18",
+    version = "0.0.19",
     packages = packages,
     url = "http://code.google.com/p/fibra/",
     author='Simon Wittber',
@@ -20,7 +20,6 @@ setup(
     maintainer_email='mario@anche.no',
     license='MIT',
     platforms=['Any'],
-    description="""Fibra provides advanced cooperative concurrency using Python generators.
-    """,
+    description="Fibra provides advanced cooperative concurrency using Python generators.",
 )
 
