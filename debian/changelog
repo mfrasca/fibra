@@ -1,0 +1,12 @@
+fibra (0.0.18-1) unstable; urgency=medium
+
+  * resolve warnings in lintian report
+  * accept new upstream
+
+ -- Mario Frasca <mario@anche.no>  Thu, 17 May 2018 08:47:53 -0500
+
+fibra (0.0.17-1) unstable; urgency=medium
+
+  * Initial release (Closes: #898736)
+
+ -- Mario Frasca <mario@anche.no>  Tue, 15 May 2018 10:38:36 -0500

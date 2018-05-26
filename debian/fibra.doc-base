@@ -1,0 +1,10 @@
+Document: fibra
+Title: Debian fibra Manual
+Author: Mario Frasca
+Abstract: This manual describes what fibra is
+ and how it can be used to
+ manage online manuals on Debian systems.
+Section: unknown
+
+Format: text
+Files: /usr/share/doc/fibra/fibra.text.gz
