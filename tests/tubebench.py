@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import timeit
 import fibra
 import sys
@@ -27,5 +29,5 @@ def test():
     schedule.run()
 
 if __name__ == "__main__":
-    print timeit.Timer(setup="from __main__ import test", stmt='test()').timeit(100)
+    print(timeit.Timer(setup="from __main__ import test", stmt='test()').timeit(100))
 

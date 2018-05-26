@@ -1,13 +1,15 @@
+from __future__ import print_function
+
 import fibra
 
 def task_a():
     for i in xrange(10):
-        print 'In Task A'
+        print('In Task A')
         yield None
 
 def task_b():
     for i in xrange(10):
-        print 'In Task B'
+        print('In Task B')
         yield None
 
 def test():

@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 import fibra
 
@@ -6,7 +7,7 @@ def task_a(tube):
 
 def task_b(tube):
     x = yield tube.pop()
-    print "Received:", x
+    print("Received:", x)
 
 def task_c():
     tube = fibra.Tube("Named Tube")
@@ -15,7 +16,7 @@ def task_c():
 def task_d():
     tube = fibra.Tube("Named Tube")
     x = yield tube.pop()
-    print "Received from Named Tube:", x
+    print("Received from Named Tube:", x)
 
 
 

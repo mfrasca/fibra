@@ -1,17 +1,19 @@
+from __future__ import print_function
+
 import fibra
 
 
 def task_a():
     for i in xrange(5):
-        print 'Task A is going to sleep.'
+        print('Task A is going to sleep.')
         yield 1.0
-        print 'Task A is awake.'
+        print('Task A is awake.')
         yield None
 
 def task_b():
-    print "Task B is sleeping for 10 seconds."
+    print("Task B is sleeping for 10 seconds.")
     yield 10.0
-    print 'Task B is awake.'
+    print('Task B is awake.')
 
 def task_c():
     for i in xrange(1000):
@@ -34,12 +36,12 @@ def test():
     s.install(task_b())
     s.register_idle_func(idle)
     s.run()
-    print "Idle was called", idle_count, "times. (Should be > 1)"
+    print("Idle was called", idle_count, "times. (Should be > 1)")
     idle_count = 0
     s.install(task_c())
     s.install(task_d())
     s.run()
-    print "Idle was called", idle_count, "times. (Should be 1)"
+    print("Idle was called", idle_count, "times. (Should be 1)")
 
 
 if __name__ == "__main__":

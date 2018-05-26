@@ -1,14 +1,16 @@
+from __future__ import print_function
+
 import fibra
 
 
 def task():
     yield None
-    print 'raising'
+    print('raising')
     raise Exception('ARGH')
 
 
 def watcher(e):
-    print "watcher received:", type(e), e
+    print("watcher received:", type(e), e)
 
 
 schedule = fibra.schedule()

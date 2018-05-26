@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import fibra
 
 def echo():
@@ -7,16 +9,16 @@ def echo():
         try:
             msg = yield input.pop(wait=True)
         except fibra.EmptyTube:
-            print 'no message'
+            print('no message')
             yield 1
         else:
-            print msg
+            print(msg)
 
 
 def send():
     output = fibra.Tube("log_service")
     yield output.push("hello!", wait=False)
-    print 'pushed'
+    print('pushed')
         
 
 schedule = fibra.schedule()

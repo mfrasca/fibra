@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from pygooglechart import Chart
 from pygooglechart import SimpleLineChart
 from pygooglechart import Axis
@@ -18,9 +20,9 @@ else:
     libs = ["fibrab", "kamaeliab"]
 
 for lib in libs:
-    print lib
+    print(lib)
     for i in RANGE:
-        print i 
+        print(i)
         t = timeit.Timer(setup="import %s.hackysack"%lib, stmt="%s.hackysack.runit(%d, 1000, dbg=0)"%(lib, i))
         v = t.timeit(1)
         gc.collect()

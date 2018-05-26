@@ -1,17 +1,18 @@
-import fibra
+from __future__ import print_function
 
+import fibra
 
 def task_a():
     for i in xrange(5):
-        print 'Task A is going to sleep.'
+        print('Task A is going to sleep.')
         yield 1.0
-        print 'Task A is awake.'
+        print('Task A is awake.')
         yield None
 
 def task_b():
-    print "Task B is sleeping for 10 seconds."
+    print("Task B is sleeping for 10 seconds.")
     yield 10.0
-    print 'Task B is awake.'
+    print('Task B is awake.')
 
 idle_count = 0
 def idle():
@@ -27,4 +28,4 @@ def test():
 
 if __name__ == "__main__":
     test()
-    print "Idle was called", idle_count, "times."
+    print("Idle was called", idle_count, "times.")

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import fibra
 
 def sub_task(x):
@@ -10,13 +12,13 @@ def main_task():
     #launch a sub task
     #wait for it to finish and collect the result.
     x = yield sub_task(4)
-    print x
+    print(x)
     #the sub task will raise an exception here...
     #yet the exception will bubble up to the parent task!
     try:
         x = yield sub_task(5)
     except ValueError:
-        print "Oops, an exception occured."
+        print("Oops, an exception occured.")
 
 schedule = fibra.schedule()
 schedule.debug = True

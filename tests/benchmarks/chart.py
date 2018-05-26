@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from pygooglechart import Chart
 from pygooglechart import SimpleLineChart
 from pygooglechart import Axis
@@ -12,13 +14,13 @@ for lib in "stacklessb", "fibrab", "kamaeliab":
 
 # Set the vertical range from 0 to 100
 max_y = max(max(i) for i in results.values())  * 1.1
-print max_y
+print(max_y)
 
 # Chart size of 200x125 pixels and specifying the range for the Y axis
 chart = SimpleLineChart(400, 300, y_range=[0, max_y])
 
 chart.set_colours(['0000FF', "00FF00", "FF0000", "FFFF00"])
-print sorted(results.keys())
+print(sorted(results.keys()))
 for k in sorted(results.keys()):
     data = results[k]
     chart.add_data(data)
