@@ -38,8 +38,8 @@ class IOHandler(object):
     
 
     def select(self):
-        readers = self.readers.keys()
-        writers = self.writers.keys()
+        readers = list(self.readers.keys())
+        writers = list(self.writers.keys())
         all = readers + writers
         try:
             return select.select(readers, writers, all, 0)
