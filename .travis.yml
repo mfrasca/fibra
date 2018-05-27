@@ -2,3 +2,20 @@ language: python
 
 python: 
     - "2.7"
+    - "3.5"
+
+before_install: 
+    # Environment setup
+    - export VIRT_ROOT=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION
+    - export PKG_CONFIG_PATH=$VIRT_ROOT/lib/pkgconfig
+    - pip install pip --upgrade
+    - pip install nose
+
+    # build before install
+    - python setup.py -q build
+
+install:
+    - python setup.py -q install
+
+script:
+    - nosetests --with-doctest --verbose tests
