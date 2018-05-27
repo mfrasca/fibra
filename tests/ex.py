@@ -20,7 +20,17 @@ def main_task():
     except ValueError:
         print("Oops, an exception occured.")
 
-schedule = fibra.schedule()
-schedule.debug = True
-schedule.install(main_task())
-schedule.run()
+def main():
+    """
+    >>> main()
+    256
+    Oops, an exception occured.
+
+    """
+    schedule = fibra.schedule()
+    schedule.debug = True
+    schedule.install(main_task())
+    schedule.run()
+        
+if __name__ == '__main__':
+    main()

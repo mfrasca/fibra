@@ -18,8 +18,14 @@ def b(tube):
     x = yield tube.pop()
     print('Received "%s" from tube.'%x)
 
-t = fibra.Tube()
-schedule = fibra.schedule()
-schedule.install(a(t))
-schedule.install(b(t))
-schedule.run()
+
+def main():
+    t = fibra.Tube()
+    schedule = fibra.schedule()
+    schedule.install(a(t))
+    schedule.install(b(t))
+    schedule.run()
+
+if __name__ == '__main__':
+    main()
+    

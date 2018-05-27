@@ -3,7 +3,7 @@ from __future__ import print_function
 import fibra
 
 def task_a():
-    for i in xrange(5):
+    for i in range(5):
         print('Task A is going to sleep.')
         yield 1.0
         print('Task A is awake.')

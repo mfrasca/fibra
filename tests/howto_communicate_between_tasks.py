@@ -19,11 +19,21 @@ def task_d():
     print("Received from Named Tube:", x)
 
 
+def main():
+    """
+    >>> main()
+    Received: this string is pushed to a waiting task
+    Received from Named Tube: this string is pushed into a named tube.
 
-t = fibra.Tube()
-schedule = fibra.schedule()
-schedule.install(task_a(t))
-schedule.install(task_b(t))
-schedule.install(task_c())
-schedule.install(task_d())
-schedule.run()
+    """
+    t = fibra.Tube()
+    schedule = fibra.schedule()
+    schedule.install(task_a(t))
+    schedule.install(task_b(t))
+    schedule.install(task_c())
+    schedule.install(task_d())
+    schedule.run()
+
+if __name__ == '__main__':
+    main()
+    

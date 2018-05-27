@@ -8,7 +8,7 @@ import sys
 def cat():
     meow = fibra.Tube("meow")
     woof = fibra.Tube("woof")
-    for i in xrange(1000):
+    for i in range(1000):
         m = yield woof.pop()
         yield meow.push("meow")
     

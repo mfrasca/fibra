@@ -43,7 +43,7 @@ class NonBlockHandler(object):
         return self.running_tasks
 
     def start_workers(self):
-        self.workers = set([Thread(target=self.worker_thread) for i in xrange(self.worker_count)])
+        self.workers = set([Thread(target=self.worker_thread) for i in range(self.worker_count)])
         for worker in self.workers:
             worker.setDaemon(True)
             worker.start()

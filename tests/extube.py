@@ -21,11 +21,30 @@ def send():
     print('pushed')
         
 
-schedule = fibra.schedule()
-schedule.install(echo())
-schedule.install(send())
-schedule.install(send())
-schedule.install(send())
-schedule.install(send())
-schedule.install(send())
-schedule.run()
+def main():
+    """
+    >>> main()
+    pushed
+    pushed
+    pushed
+    pushed
+    pushed
+    hello!
+    hello!
+    hello!
+    hello!
+    hello!
+    """
+
+    schedule = fibra.schedule()
+    schedule.install(echo())
+    schedule.install(send())
+    schedule.install(send())
+    schedule.install(send())
+    schedule.install(send())
+    schedule.install(send())
+    schedule.run()
+
+       
+if __name__ == '__main__':
+    main()

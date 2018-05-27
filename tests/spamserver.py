@@ -13,7 +13,7 @@ def handler(transport):
                 line = yield transport.recv_line()
                 n = parse_request(line)
                 yield transport.send_line("100 SPAM FOLLOWS")
-                for i in xrange(n):
+                for i in range(n):
                     yield transport.send_line("spam glorious spam")
             except BadRequest:
                 yield transport.send_line("400 WE ONLY SERVE SPAM")
@@ -35,6 +35,12 @@ def parse_request(line):
       raise BadRequest
     return n
 
-schedule = fibra.schedule()
-schedule.install(fibra.net.listen(('localhost', port), handler))
-schedule.run()
+
+def main():
+    schedule = fibra.schedule()
+    schedule.install(fibra.net.listen(('localhost', port), handler))
+    schedule.run()
+
+if __name__ == '__main__':
+    main()
+    

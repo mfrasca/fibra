@@ -14,12 +14,12 @@ sets up a scheduler with the SleepHandler installed. To see what types a
 SleepHandler will handle:
 
 >>> print(sleep_handler.handled_types)
-[<class 'fibra.handlers.sleep.Sleep'>, <type 'int'>, <type 'float'>, <type 'long'>]
+[<class 'fibra.handlers.sleep.Sleep'>, <class 'float'>, <class 'int'>]
 
 To see what extra functions a handler will add to the scheduler:
 
->>> print(sleep_handler.exported_functions)
-[<bound method SleepHandler.defer of <fibra.handlers.sleep.SleepHandler object at 0xa13fd0>>]
+>>> print(sleep_handler.exported_functions)  # doctest: +ELLIPSIS
+[<bound method SleepHandler.defer of <fibra.handlers.sleep.SleepHandler object at 0x...>>]
 
 
 To create a custom handler, use the following protocol.

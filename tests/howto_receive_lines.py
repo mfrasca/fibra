@@ -11,8 +11,14 @@ def task(sock, address):
         line = yield line_receiver
         print("Received:", line)
 
-s = fibra.schedule()
-#install a task which installs a new task on a new connection
-s.install(fibra.net.listen(("localhost", 2000), task))
-s.run()
 
+def main():
+    s = fibra.schedule()
+    #install a task which installs a new task on a new connection
+    s.install(fibra.net.listen(("localhost", 2000), task))
+    s.run()
+
+if __name__ == '__main__':
+    main()
+    
+    
