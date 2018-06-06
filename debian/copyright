@@ -3,7 +3,7 @@ Upstream-Name: fibra
 Source: https://pypi.org/project/fibra/
 
 Files: *
-Copyright: 2009 Simon Wittber
+Copyright: 2009 Simon Wittber, 2018 Mario Frasca
 License: MIT
 
 Files: debian/*
