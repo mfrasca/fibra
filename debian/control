@@ -2,7 +2,7 @@ Source: fibra
 Section: python
 Priority: optional
 Maintainer: Mario Frasca <mario@anche.no>
-Build-Depends: debhelper (>= 9), dh-python, python-all, python-setuptools, python3-all, python3-setuptools
+Build-Depends: debhelper (>= 10), dh-python, python-all, python-setuptools, python3-all, python3-setuptools
 Standards-Version: 3.9.8
 Homepage: https://pypi.org/project/fibra/
 X-Python-Version: >= 2.6
