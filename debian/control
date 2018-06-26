@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 10), dh-python, python-all, python-setuptools, pyth
 Standards-Version: 3.9.8
 Homepage: https://pypi.org/project/fibra/
 X-Python-Version: >= 2.7
-X-Python3-Version: >= 3.2
+X-Python3-Version: >= 3.5
 
 Package: python-fibra
 Architecture: all

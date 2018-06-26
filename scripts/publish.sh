@@ -13,20 +13,20 @@ python setup.py sdist | awk 'BEGIN{count=0}/^.*$/{count++; printf("running setup
 # way to freeze might mean starting a branch at the merge point.
 
 #
-TAGNAME=$(ls dist | grep 'tar.gz$' | tail -n1 | sed -e 's/.*\([0-9]\.[0-9]\.[0-9]*\).*/v\1/')
-git tag $TAGNAME
+PUBLISHING=$(ls dist | grep 'tar.gz$' | tail -n1 | sed -e 's/.*\([0-9]\.[0-9]\.[0-9]*\).*/\1/')
+git tag v$PUBLISHING
 
 # publish on pypi
 #
 python setup.py sdist --formats zip upload -r pypi
 
-cp dist/ghini.desktop-${PUBLISHING}.tar.gz /tmp/ghini.desktop-${PUBLISHING}.orig.tar.gz
+cp dist/fibra-${PUBLISHING}.tar.gz /tmp/fibra_${PUBLISHING}.orig.tar.gz
 ( cd /tmp
-  rm -fr ghini.desktop-${PUBLISHING}/ 2>/dev/null
-  tar zxf ghini.desktop-${PUBLISHING}.orig.tar.gz 
-  cd ghini.desktop-${PUBLISHING}/
-  dh_make --yes --indep --file ../ghini.desktop-${PUBLISHING}.orig.tar.gz )
-cp debian/* /tmp/ghini.desktop-${PUBLISHING}/debian
-( cd /tmp/ghini.desktop-${PUBLISHING}/
-  find debian -iname "*.ex" -execdir rm {} \; -or -name "*.source" -execdir rm {} \; -or -name "*~" -execdir rm {} \;
+  rm -fr fibra-${PUBLISHING}/ 2>/dev/null
+  tar zxf fibra-${PUBLISHING}.orig.tar.gz 
+  cd fibra-${PUBLISHING}/ )
+cp -a debian /tmp/fibra-${PUBLISHING}
+( cd /tmp/fibra-${PUBLISHING}/
   debuild )
+
+echo dput mentors $(ls /tmp/fibra_${PUBLISHING}-*_*.changes | tail -n 1)

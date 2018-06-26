@@ -5,5 +5,3 @@ export PYBUILD_NAME=fibra
 
 %:
 	dh $@ --with python2,python3 --buildsystem=pybuild
-
-
