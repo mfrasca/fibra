@@ -18,5 +18,5 @@ git tag -f $TAGNAME
 
 # publish on pypi
 #
-echo python setup.py sdist --formats zip upload -r pypi
+python setup.py sdist --formats zip upload -r pypi
 
