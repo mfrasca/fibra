@@ -14,7 +14,7 @@ python setup.py sdist | awk 'BEGIN{count=0}/^.*$/{count++; printf("running setup
 
 #
 TAGNAME=$(ls dist | grep 'tar.gz$' | tail -n1 | sed -e 's/.*\([0-9]\.[0-9]\.[0-9]*\).*/v\1/')
-git tag -f $TAGNAME
+git tag $TAGNAME
 
 # publish on pypi
 #
