@@ -1,5 +1,5 @@
-fibra (0.0.20-2) unstable; urgency=low
+fibra (0.0.20-1) unstable; urgency=low
 
   * Initial release (Closes: #898736)
 
- -- Mario Frasca <mario@anche.no>  Sun, 3 Jun 2018 09:37:53 -0500
+ -- Mario Frasca <mario@anche.no>  Tue, 26 Jun 2018 10:55:33 -0500
