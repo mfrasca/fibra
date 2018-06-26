@@ -11,7 +11,7 @@ packages = find_packages()
 
 setup(
     name = "fibra",
-    version = "0.0.20",
+    version = "0.0.21",
     packages = packages,
     url = "http://code.google.com/p/fibra/",
     author='Simon Wittber',
