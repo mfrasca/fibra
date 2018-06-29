@@ -18,7 +18,7 @@ git tag v$PUBLISHING
 
 # publish on pypi
 #
-python setup.py sdist --formats zip upload -r pypi
+python setup.py sdist --formats zip upload --sign -r pypi
 
 cp dist/fibra-${PUBLISHING}.tar.gz /tmp/fibra_${PUBLISHING}.orig.tar.gz
 ( cd /tmp

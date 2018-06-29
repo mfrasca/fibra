@@ -11,10 +11,10 @@ X-Python3-Version: >= 3.5
 Package: python-fibra
 Architecture: all
 Depends: ${python:Depends}, ${misc:Depends}
-Description: Advanced cooperative concurrency using Python generators.
- cooperative concurrency is something that will avoid you problems like
+Description: Advanced cooperative concurrency using Python2 generators
+ Cooperative concurrency is something that will avoid you problems like
  creating a database object in one thread and committing the transaction in
- a different thread.  that is not allowed with most db engines.  with
+ a different thread.  That is not allowed with most db engines.  With
  cooperative concurrency you are in one thread, so no such difficulties.
  .
  This package installs the library for Python 2.
@@ -22,10 +22,10 @@ Description: Advanced cooperative concurrency using Python generators.
 Package: python3-fibra
 Architecture: all
 Depends: ${python3:Depends}, ${misc:Depends}
-Description: Advanced cooperative concurrency using Python generators.
- cooperative concurrency is something that will avoid you problems like
+Description: Advanced cooperative concurrency using Python3 generators
+ Cooperative concurrency is something that will avoid you problems like
  creating a database object in one thread and committing the transaction in
- a different thread.  that is not allowed with most db engines.  with
+ a different thread.  That is not allowed with most db engines.  With
  cooperative concurrency you are in one thread, so no such difficulties.
  .
  This package installs the library for Python 3.
